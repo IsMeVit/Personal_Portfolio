@@ -50,7 +50,10 @@ const validateForm = () => {
   let isValid = true;
   errors.value = { name: "", telegram: "", message: "" };
 
-  if (name.value.length < MIN_NAME_LENGTH || name.value.length > MAX_NAME_LENGTH) {
+  if (
+    name.value.length < MIN_NAME_LENGTH ||
+    name.value.length > MAX_NAME_LENGTH
+  ) {
     errors.value.name = `Name must be between ${MIN_NAME_LENGTH} and ${MAX_NAME_LENGTH} characters.`;
     isValid = false;
   }
@@ -60,7 +63,10 @@ const validateForm = () => {
     isValid = false;
   }
 
-  if (message.value.length < MIN_MESSAGE_LENGTH || message.value.length > MAX_MESSAGE_LENGTH) {
+  if (
+    message.value.length < MIN_MESSAGE_LENGTH ||
+    message.value.length > MAX_MESSAGE_LENGTH
+  ) {
     errors.value.message = `Message must be between ${MIN_MESSAGE_LENGTH} and ${MAX_MESSAGE_LENGTH} characters.`;
     isValid = false;
   }
@@ -74,7 +80,7 @@ const handleResize = () => {
   const width = window.innerWidth;
   if (width >= 768) {
     isMobile.value = false;
-    showContactForm.value = true; 
+    showContactForm.value = true;
   } else {
     isMobile.value = true;
   }
@@ -91,7 +97,7 @@ const sendToTelegram = async () => {
   }
 
   try {
-    const res = await fetch(webhookUrl, {
+    const res = await fetch(WebhookUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -126,82 +132,185 @@ onUnmounted(() => window.removeEventListener("resize", handleResize));
 
 <template>
   <div
-  data-aos="fade-enter-active" data-aos-delay="200"
-  class="min-h-screen flex flex-col items-center justify-center p-4 md:p-10 relative z-10 font-sans">
-    
+    data-aos="fade-enter-active"
+    data-aos-delay="200"
+    class="min-h-screen flex flex-col items-center justify-center p-4 md:p-10 relative z-10 font-sans"
+  >
     <header class="text-center mb-12 max-w-2xl">
-      <h1 class="text-4xl md:text-6xl font-black text-white tracking-tighter mb-4">
-        Let’s <span class="animate-gradient-text bg-linear-to-r from-purple-400 via-cyan-300 to-blue-400 bg-clip-text text-transparent bg-size-[200%_auto]">Connect</span>
+      <h1
+        class="text-4xl md:text-6xl font-black text-white tracking-tighter mb-4"
+      >
+        Let’s
+        <span
+          class="animate-gradient-text bg-linear-to-r from-purple-400 via-cyan-300 to-blue-400 bg-clip-text text-transparent bg-size-[200%_auto]"
+          >Connect</span
+        >
       </h1>
-      <p class="text-gray-400 text-lg">Got a project or just want to chat? I'm just a message away.</p>
+      <p class="text-gray-400 text-lg">
+        Got a project or just want to chat? I'm just a message away.
+      </p>
     </header>
 
     <div class="max-w-5xl w-full grid grid-cols-1 md:grid-cols-12 gap-6">
-      
       <section class="md:col-span-4">
-        <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-4xl p-8 shadow-2xl h-full flex flex-col justify-center">
-          <h2 class="text-indigo-300 font-mono text-xs uppercase tracking-[0.3em] mb-8 text-center">Find Me Online</h2>
+        <div
+          class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-[2.5rem] p-8 shadow-2xl flex flex-col justify-start items-center h-full"
+        >
+          <h2
+            class="text-indigo-300 font-mono text-xs uppercase tracking-[0.3em] text-center opacity-70 group-hover/card:opacity-100 transition-opacity"
+          >
+            Find Me Online
+          </h2>
+          <div class="mb-10 h-px w-60 bg-linear-to-r from-transparent via-indigo-500 to-transparent opacity-50 shadow-[0_0_8px_rgba(99,102,241,0.8)]"></div>
+          
           <div class="grid grid-cols-3 md:grid-cols-1 gap-6">
-            <a v-for="icon in Icons.SocialMedia" :key="icon.name" :href="getSocialLink(icon.name)" target="_blank"
-               class="flex items-center md:justify-start justify-center gap-4 group transition-all">
-              <div class="p-3 bg-white/5 rounded-2xl border border-white/10 group-hover:border-purple-500/50 group-hover:bg-purple-500/10 group-hover:shadow-[0_0_15px_rgba(168,85,247,0.4)] transition-all">
-                <svg width="24" height="24" :viewBox="icon.viewBox" fill="currentColor" class="text-white group-hover:text-purple-400">
+            <a
+              v-for="icon in Icons.SocialMedia"
+              :key="icon.name"
+              :href="getSocialLink(icon.name)"
+              target="_blank"
+              class="flex items-center md:justify-start justify-center gap-4 group transition-all"
+            >
+              <div
+                class="p-3 bg-white/5 rounded-2xl border border-white/10 group-hover:border-purple-500/50 group-hover:bg-purple-500/10 group-hover:shadow-[0_0_15px_rgba(168,85,247,0.4)] transition-all"
+              >
+                <svg
+                  width="24"
+                  height="24"
+                  :viewBox="icon.viewBox"
+                  fill="currentColor"
+                  class="text-white group-hover:text-purple-400"
+                >
                   <path :d="icon.url"></path>
                 </svg>
               </div>
-              <span class="hidden md:block text-gray-300 font-bold group-hover:text-white transition-colors">{{ icon.name }}</span>
+              <span
+                class="hidden md:block text-gray-300 font-bold group-hover:text-white transition-colors"
+                >{{ icon.name }}</span
+              >
             </a>
           </div>
         </div>
       </section>
 
-      <section class="md:col-span-8 bg-black/30 backdrop-blur-xl border border-white/10 rounded-[2.5rem] p-8 md:p-10 shadow-2xl relative overflow-hidden">
-        
-        <div v-if="isMobile && !showContactForm" @click="showForm" class="flex flex-col items-center justify-center py-10 cursor-pointer group">
-          <div class="w-20 h-20 bg-purple-600/20 rounded-full flex items-center justify-center mb-4 border border-purple-500/30 group-hover:scale-110 transition-transform shadow-[0_0_20px_rgba(168,85,247,0.2)]">
+      <section
+        class="md:col-span-8 bg-black/30 backdrop-blur-xl border border-white/10 rounded-[2.5rem] p-8 md:p-10 shadow-2xl relative overflow-hidden"
+      >
+        <div
+          v-if="isMobile && !showContactForm"
+          @click="showForm"
+          class="flex flex-col items-center justify-center py-10 cursor-pointer group"
+        >
+          <div
+            class="w-20 h-20 bg-purple-600/20 rounded-full flex items-center justify-center mb-4 border border-purple-500/30 group-hover:scale-110 transition-transform shadow-[0_0_20px_rgba(168,85,247,0.2)]"
+          >
             <span class="text-3xl">🚀</span>
           </div>
           <span class="text-xl font-bold text-white">Send a Message</span>
           <p class="text-sm text-gray-500 mt-2">Tap to open form</p>
         </div>
 
-        <div v-if="showContactForm || !isMobile" :class="{ block: true, hidden: isMobile && !showContactForm }">
+        <div
+          v-if="showContactForm || !isMobile"
+          :class="{ block: true, hidden: isMobile && !showContactForm }"
+        >
           <div class="flex justify-between items-center mb-8">
-            <h2 class="text-2xl font-black text-white tracking-tight">Send a Message</h2>
-            <button v-if="isMobile" @click="showIcon" class="text-gray-500 hover:text-white text-xs font-mono uppercase tracking-widest">Close &times;</button>
+            <h2 class="text-2xl font-black text-white tracking-tight">
+              Send a Message
+            </h2>
+            <button
+              v-if="isMobile"
+              @click="showIcon"
+              class="text-gray-500 hover:text-white text-xs font-mono uppercase tracking-widest"
+            >
+              Close &times;
+            </button>
           </div>
 
           <form @submit.prevent="sendToTelegram" class="space-y-5">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
-                <label class="block text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-2 ml-1">Your Name</label>
-                <input v-model="name" type="text" placeholder="John Doe" 
-                  :class="['w-full px-4 py-4 bg-white/5 border rounded-2xl focus:ring-2 focus:ring-purple-500 outline-none transition-all text-white', errors.name ? 'border-red-500/50' : 'border-white/10']" />
-                <p v-if="errors.name" class="text-red-400 text-[10px] mt-1 ml-1 uppercase">{{ errors.name }}</p>
+                <label
+                  class="block text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-2 ml-1"
+                  >Your Name</label
+                >
+                <input
+                  v-model="name"
+                  type="text"
+                  placeholder="John Doe"
+                  :class="[
+                    'w-full px-4 py-4 bg-white/5 border rounded-2xl focus:ring-2 focus:ring-purple-500 outline-none transition-all text-white',
+                    errors.name ? 'border-red-500/50' : 'border-white/10',
+                  ]"
+                />
+                <p
+                  v-if="errors.name"
+                  class="text-red-400 text-[10px] mt-1 ml-1 uppercase"
+                >
+                  {{ errors.name }}
+                </p>
               </div>
               <div>
-                <label class="block text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-2 ml-1">Telegram User</label>
-                <input v-model="telegram" type="text" placeholder="username_only" 
-                  :class="['w-full px-4 py-4 bg-white/5 border rounded-2xl focus:ring-2 focus:ring-purple-500 outline-none transition-all text-white', errors.telegram ? 'border-red-500/50' : 'border-white/10']" />
-                <p v-if="errors.telegram" class="text-red-400 text-[10px] mt-1 ml-1 uppercase">{{ errors.telegram }}</p>
+                <label
+                  class="block text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-2 ml-1"
+                  >Telegram User</label
+                >
+                <input
+                  v-model="telegram"
+                  type="text"
+                  placeholder="username_only"
+                  :class="[
+                    'w-full px-4 py-4 bg-white/5 border rounded-2xl focus:ring-2 focus:ring-purple-500 outline-none transition-all text-white',
+                    errors.telegram ? 'border-red-500/50' : 'border-white/10',
+                  ]"
+                />
+                <p
+                  v-if="errors.telegram"
+                  class="text-red-400 text-[10px] mt-1 ml-1 uppercase"
+                >
+                  {{ errors.telegram }}
+                </p>
               </div>
             </div>
 
             <div>
-              <label class="block text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-2 ml-1">Message</label>
-              <textarea v-model="message" rows="4" placeholder="How can I help you?" 
-                :class="['w-full px-4 py-4 bg-white/5 border rounded-2xl focus:ring-2 focus:ring-purple-500 outline-none transition-all text-white resize-none', errors.message ? 'border-red-500/50' : 'border-white/10']"></textarea>
-              <p v-if="errors.message" class="text-red-400 text-[10px] mt-1 ml-1 uppercase">{{ errors.message }}</p>
+              <label
+                class="block text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-2 ml-1"
+                >Message</label
+              >
+              <textarea
+                v-model="message"
+                rows="4"
+                placeholder="How can I help you?"
+                :class="[
+                  'w-full px-4 py-4 bg-white/5 border rounded-2xl focus:ring-2 focus:ring-purple-500 outline-none transition-all text-white resize-none',
+                  errors.message ? 'border-red-500/50' : 'border-white/10',
+                ]"
+              ></textarea>
+              <p
+                v-if="errors.message"
+                class="text-red-400 text-[10px] mt-1 ml-1 uppercase"
+              >
+                {{ errors.message }}
+              </p>
             </div>
 
             <input type="text" v-model="honeypot" style="display: none" />
 
-            <button type="submit" class="w-full py-4 bg-white text-black rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-purple-500 hover:text-white hover:shadow-[0_0_20px_rgba(168,85,247,0.5)] transition-all active:scale-95 flex items-center justify-center gap-2">
+            <button
+              type="submit"
+              class="w-full py-4 bg-white text-black rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-purple-500 hover:text-white hover:shadow-[0_0_20px_rgba(168,85,247,0.5)] transition-all active:scale-95 flex items-center justify-center gap-2"
+            >
               Send Message 🚀
             </button>
 
             <transition name="fade">
-              <p v-if="isSent" class="text-green-400 text-center font-bold text-sm animate-bounce">✅ Message sent to Telegram!</p>
+              <p
+                v-if="isSent"
+                class="text-green-400 text-center font-bold text-sm animate-bounce"
+              >
+                ✅ Message sent to Telegram!
+              </p>
             </transition>
           </form>
         </div>
@@ -212,10 +321,23 @@ onUnmounted(() => window.removeEventListener("resize", handleResize));
 
 <style scoped>
 @keyframes gradient-text {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
 }
-.animate-gradient-text { animation: gradient-text 4s ease infinite; }
-.fade-enter-active, .fade-leave-active { transition: opacity 0.5s; }
-.fade-enter-from, .fade-leave-to { opacity: 0; }
+.animate-gradient-text {
+  animation: gradient-text 4s ease infinite;
+}
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
 </style>
