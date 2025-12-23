@@ -1,8 +1,7 @@
 <script setup>
-import { ref, onMounted, onUnmounted, watch } from "vue";
-import { debounce } from 'lodash-es'; 
+import { ref, onMounted, onUnmounted } from "vue";
 
-const TELEGRAM_REGEX = /^[a-zA-Z][a-zA-Z0-9_]{4,31}$/; 
+const TELEGRAM_REGEX = /^[a-zA-Z][a-zA-Z0-9_]{4,31}$/;
 const MIN_NAME_LENGTH = 2;
 const MAX_NAME_LENGTH = 50;
 const MIN_MESSAGE_LENGTH = 10;
@@ -29,16 +28,12 @@ const Icons = {
 };
 
 const getSocialLink = (name) => {
-  switch (name) {
-    case "Linkedin":
-      return "https://www.linkedin.com/in/yourlinkedinprofile/";
-    case "Facebook":
-      return "https://web.facebook.com/PichsovandaraDevit";
-    case "GitHub":
-      return "https://github.com/IsMeVit";
-    default:
-      return "#";
-  }
+  const links = {
+    Linkedin: "https://www.linkedin.com/in/yourlinkedinprofile/",
+    Facebook: "https://web.facebook.com/PichsovandaraDevit",
+    GitHub: "https://github.com/IsMeVit",
+  };
+  return links[name] || "#";
 };
 
 const showContactForm = ref(false);
@@ -48,18 +43,11 @@ const telegram = ref("");
 const message = ref("");
 const isSent = ref(false);
 const honeypot = ref("");
-
-const errors = ref({
-  name: "",
-  telegram: "",
-  message: "",
-});
-
+const errors = ref({ name: "", telegram: "", message: "" });
 let messageTimeout = null;
 
 const validateForm = () => {
   let isValid = true;
-  
   errors.value = { name: "", telegram: "", message: "" };
 
   if (name.value.length < MIN_NAME_LENGTH || name.value.length > MAX_NAME_LENGTH) {
@@ -68,60 +56,34 @@ const validateForm = () => {
   }
 
   if (!telegram.value.length || !TELEGRAM_REGEX.test(telegram.value)) {
-    errors.value.telegram = "Invalid Telegram username. Must be 5-32 characters and start with letters, Do NOT start with @.";
+    errors.value.telegram = "Invalid Telegram username (5-32 chars, no @).";
     isValid = false;
   }
-  
+
   if (message.value.length < MIN_MESSAGE_LENGTH || message.value.length > MAX_MESSAGE_LENGTH) {
     errors.value.message = `Message must be between ${MIN_MESSAGE_LENGTH} and ${MAX_MESSAGE_LENGTH} characters.`;
     isValid = false;
   }
-
   return isValid;
 };
 
-const showForm = () => {
-  showContactForm.value = true;
-};
-
-const showIcon = () => {
-  showContactForm.value = false;
-};
-
-const lastWidth = ref(typeof window !== 'undefined' ? window.innerWidth : 0);
+const showForm = () => (showContactForm.value = true);
+const showIcon = () => (showContactForm.value = false);
 
 const handleResize = () => {
-  const currentWidth = window.innerWidth;
-  
-  if (currentWidth !== lastWidth.value) {
-    isMobile.value = currentWidth < 768;
-
-    if (!isMobile.value) {
-      showContactForm.value = true;
-    } else {
-      showContactForm.value = false;
-    }
-    
-    lastWidth.value = currentWidth;
+  const width = window.innerWidth;
+  if (width >= 768) {
+    isMobile.value = false;
+    showContactForm.value = true; 
+  } else {
+    isMobile.value = true;
   }
 };
 
-onMounted(() => {
-  lastWidth.value = window.innerWidth; // Set initial width
-  handleResize();
-  window.addEventListener("resize", handleResize);
-});
-
-onUnmounted(() => {
-  window.removeEventListener("resize", handleResize);
-});
-
 const sendToTelegram = async () => {
-  if(!validateForm()) {
-    return;
-  }
+  if (!validateForm()) return;
 
-  const WebhookUrl = "/api/Webhook.js";
+  const webhookUrl = "/api/webhook";
 
   if (messageTimeout) {
     clearTimeout(messageTimeout);
@@ -129,11 +91,9 @@ const sendToTelegram = async () => {
   }
 
   try {
-    const res = await fetch(WebhookUrl, {
+    const res = await fetch(webhookUrl, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         name: name.value,
         telegram: telegram.value,
@@ -141,32 +101,27 @@ const sendToTelegram = async () => {
         honeypot: honeypot.value,
       }),
     });
-    
+
     if (res.ok) {
       isSent.value = true;
-      name.value = "";
-      telegram.value = "";
-      message.value = "";
-      honeypot.value = "";
-      if (isMobile.value) {
-        showIcon();
-      }
-      messageTimeout = setTimeout(() => {
-        isSent.value = false;
-      }, 5000);
+      name.value = telegram.value = message.value = honeypot.value = "";
+      if (isMobile.value) showIcon();
+      messageTimeout = setTimeout(() => (isSent.value = false), 5000);
     } else {
       const errorData = await res.json().catch(() => ({}));
-      alert(
-        `Submission Failed: ${
-          errorData.message || res.statusText || "Unknown server error"
-        }`
-      );
+      alert(`Submission Failed: ${errorData.message || res.statusText}`);
     }
   } catch (error) {
-    console.error("Error sending form:", error);
     alert("Failed to send message. Please try again.");
   }
 };
+
+onMounted(() => {
+  handleResize();
+  window.addEventListener("resize", handleResize);
+});
+
+onUnmounted(() => window.removeEventListener("resize", handleResize));
 </script>
 
 <template>
