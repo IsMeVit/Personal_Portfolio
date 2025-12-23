@@ -84,7 +84,7 @@ const sendToTelegram = async () => {
   }
 
   try {
-    const res = await fetch(WebhookUrl, {
+    const res = await fetch(webhookUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
