@@ -88,13 +88,21 @@ const showIcon = () => {
   showContactForm.value = false;
 };
 
-const handleResize = () => {
-  isMobile.value = window.innerWidth < 768;
+const lastWidth = ref(typeof window !== 'undefined' ? window.innerWidth : 0);
 
-  if (!isMobile.value) {
-    showContactForm.value = true;
-  } else if (!showContactForm.value) {
-    showContactForm.value = false;
+const handleResize = () => {
+  const currentWidth = window.innerWidth;
+  
+  if (currentWidth !== lastWidth.value) {
+    isMobile.value = currentWidth < 768;
+
+    if (!isMobile.value) {
+      showContactForm.value = true;
+    } else {
+      showContactForm.value = false;
+    }
+    
+    lastWidth.value = currentWidth;
   }
 };
 
@@ -112,7 +120,7 @@ const sendToTelegram = async () => {
     return;
   }
 
-  const WebhookUrl = "/api/Webhook";
+  const WebhookUrl = "/api/Webhook.js";
 
   if (messageTimeout) {
     clearTimeout(messageTimeout);
