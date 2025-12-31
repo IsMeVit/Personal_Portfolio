@@ -8,6 +8,9 @@ const skillCategories = [
 </script>
 
 <template>
+  <h1 id="about" class="mt-44 text-center text-4xl md:text-5xl font-black mb-12 drop-shadow-[0_0_10px_rgba(168,85,247,0.4)]">
+    ABOUT ME
+  </h1>
   <div
     data-aos="fade-left" data-aos-delay="200"
     class ="min-h-screen flex items-center justify-center p-4 md:p-10 relative z-10"

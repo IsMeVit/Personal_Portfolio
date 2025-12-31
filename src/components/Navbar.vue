@@ -1,80 +1,95 @@
-<script setup>
-import { ref } from 'vue';
+<script setup lang="ts">
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 
-const isMenuOpen = ref(false);
+interface NavItem {
+  name: string;
+  href: string;
+}
 
-const navItems = [
+const isMenuOpen = ref<boolean>(false);
+const isVisible = ref<boolean>(true);
+const scrollY = ref<number>(0);
+const lastScrollPosition = ref<number>(0);
+
+const navItems: NavItem[] = [
   { name: 'Home', href: '#home' },
   { name: 'About', href: '#about' },
   { name: 'Projects', href: '#project' },
   { name: 'Contact', href: '#contact' },
 ];
 
-const closeMenu = () => {
-  isMenuOpen.value = false;
+const navStyle = computed(() => {
+  const opacity = Math.min(scrollY.value / 400, 0.6); 
+  const blur = Math.min(scrollY.value / 50, 20);      
+  return {
+    backgroundColor: `rgba(0, 0, 0, ${0.2 + opacity})`,
+    backdropFilter: `blur(${10 + blur}px)`,
+  };
+});
+
+const handleScroll = (): void => {
+  const current = window.pageYOffset || document.documentElement.scrollTop;
+  if (current < 0) return;
+  if (isMenuOpen.value) return;
+
+  const diff = current - lastScrollPosition.value;
+  if (Math.abs(diff) < 40) return;
+
+  isVisible.value = diff < 0 || current < 50;
+  lastScrollPosition.value = current;
 };
+
+onMounted(() => window.addEventListener('scroll', handleScroll, { passive: true }));
+onUnmounted(() => window.removeEventListener('scroll', handleScroll));
+
 </script>
 
 <template>
-  <div class="relative" style="font-family: 'Space-mono';">
-    <div class="absolute inset-0 "></div>
-
-    <div class="fixed top-5.5 left-0 w-full z-50">
-
-      <!-- Mobile menu button -->
-      <div class="lg:hidden flex justify-end p-4">
+  <header 
+    class="fixed top-0 left-0 w-full z-50 pt-6 px-4 transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)]"
+    :class="isVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'"
+  >
+    <div class="max-w-5xl mx-auto flex flex-col items-center">
+      
+      <div class="w-full flex justify-end lg:hidden mb-4">
         <button
           @click="isMenuOpen = !isMenuOpen"
-          class="p-2 rounded-lg backdrop-blur-md bg-white/10 border border-blue-800/20 focus:outline-none focus:ring-2 focus:ring-[#9f85ff] focus:ring-opacity-75 transition-all duration-300"
-          aria-label="Toggle navigation menu"
+          class="p-4 rounded-2xl text-white transition-all active:scale-90 bg-white/10 border border-white/20 backdrop-blur-md"
         >
-          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" v-if="!isMenuOpen">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-          </svg>
-          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" v-else>
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-          </svg>
+          <div class="w-6 h-5 flex flex-col justify-between items-center relative">
+            <span class="w-full h-0.5 bg-current transition-all duration-300" :class="isMenuOpen ? 'rotate-45 translate-y-2' : ''"></span>
+            <span class="w-full h-0.5 bg-current transition-all duration-300" :class="isMenuOpen ? 'opacity-0' : ''"></span>
+            <span class="w-full h-0.5 bg-current transition-all duration-300" :class="isMenuOpen ? '-rotate-45 -translate-y-2' : ''"></span>
+          </div>
         </button>
       </div>
 
-      <!-- Navigation menu -->
-      <div
-        class="transition-all duration-300 ease-in-out lg:flex lg:justify-center lg:items-center"
-        :class="{
-          'max-h-0 opacity-0 overflow-hidden lg:max-h-full lg:opacity-100 lg:overflow-visible': !isMenuOpen,
-          'max-h-screen opacity-100': isMenuOpen
-        }"
+      <nav 
+        :style="navStyle"
+        class="flex flex-col lg:flex-row items-center px-2 py-2 lg:px-6 lg:py-2 gap-1 lg:gap-4 rounded-4xl border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] transition-all duration-500 w-full lg:w-auto"
+        :class="isMenuOpen ? 'max-h-100 opacity-100' : 'max-h-0 opacity-0 lg:max-h-full lg:opacity-100 overflow-hidden lg:overflow-visible'"
       >
-        <nav class="backdrop-blur-md bg-white/10 rounded-2xl px-6 py-3 lg:px-8 shadow-lg border border-blue-800/20 w-full mx-auto lg:w-auto flex flex-col lg:flex-row items-center justify-center gap-4 lg:gap-8">
-          <a
-            v-for="item in navItems"
-            :key="item.name"
-            :href="item.href"
-            class="relative py-2 lg:pb-2 w-full text-center lg:w-auto group"
-            @click="closeMenu"
-          >
-            <span class="text-lg text-white font-semibold transition-colors duration-300 active:text-[#9f85ff] group-hover:text-[#9f85ff]">
-              {{ item.name }}
-            </span>
-            <span class="absolute bottom-0 left-1/2 transform -translate-x-1/2 bg-[#9f85ff] transition-all duration-300 ease-in-out w-0 group-hover:w-[70%] group-active:w-[30%] "></span>
-          </a>
+        <a
+          v-for="item in navItems"
+          :key="item.name"
+          :href="item.href"
+          @click="isMenuOpen = false"
+          class="relative px-5 py-2.5 text-[17px] font-medium text-white/70 hover:text-white transition-all duration-300 group rounded-full hover:bg-white/5"
+        >
+          {{ item.name }}
+          <span class="absolute inset-x-4 bottom-1 h-px bg-[#9f85ff] scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out"></span>
+        </a>
 
-          <div class="w-full h-px bg-white/20 lg:hidden"></div>
+        <div class="hidden lg:block w-px h-4 bg-white/10 mx-2"></div>
 
-          <p class="text-lg text-white hidden lg:block">|</p>
-
-          <a
-            href="https://github.com/IsMeVit" target="_blank"
-            class="relative py-2 lg:pb-2 w-full text-center lg:w-auto group"
-            @click="closeMenu"
-          >
-            <span class="text-lg text-white font-semibold transition-colors duration-300 active:text-[#9f85ff]  hover:text-[#9f85ff]">
-              Github
-            </span>
-            <span class="absolute bottom-0 left-1/2 transform -translate-x-1/2  bg-[#9f85ff] transition-all duration-300 ease-in-out w-0 group-hover:w-[70%] group-active:w-[30%]"></span>
-          </a>
-        </nav>
-      </div>
+        <a 
+          href="https://github.com/IsMeVit" 
+          target="_blank"
+          class="px-5 py-2.5 text-sm font-semibold text-[#9f85ff] hover:bg-[#9f85ff] hover:text-white rounded-full transition-all duration-300 border border-[#9f85ff]/20 hover:border-[#9f85ff]"
+        >
+          Github
+        </a>
+      </nav>
     </div>
-  </div>
+  </header>
 </template>

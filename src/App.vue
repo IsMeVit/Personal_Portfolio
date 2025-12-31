@@ -1,4 +1,5 @@
 <script setup lang="ts">
+
   import { onMounted } from 'vue';
   import AOS from 'aos';
   import 'aos/dist/aos.css';
@@ -21,9 +22,10 @@
 
 <template>
   <div class="relative min-h-screen bg-[#1d2029] text-white flex flex-col items-center justify-center overflow-x-hidden">
+    <Background />
+    
     <Navbar />
     <Home />
-    <Background />
     <About /> 
     <Project />
     <Contact />

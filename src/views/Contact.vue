@@ -134,6 +134,7 @@ onUnmounted(() => window.removeEventListener("resize", handleResize));
   <div
     data-aos="fade-enter-active"
     data-aos-delay="200"
+    id="contact"
     class="min-h-screen flex flex-col items-center justify-center p-4 md:p-10 relative z-10 font-sans"
   >
     <header class="text-center mb-12 max-w-2xl">
@@ -151,7 +152,8 @@ onUnmounted(() => window.removeEventListener("resize", handleResize));
       </p>
     </header>
 
-    <div class="max-w-5xl w-full grid grid-cols-1 md:grid-cols-12 gap-6">
+    <div
+    class="max-w-5xl w-full grid grid-cols-1 md:grid-cols-12 gap-6">
       <section class="md:col-span-4">
         <div
           class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-[2.5rem] p-8 shadow-2xl flex flex-col justify-start items-center h-full"
