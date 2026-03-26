@@ -3,7 +3,7 @@ services:
   portfolio:
     build:
       context: .
-  container_name: personal-portfolio
-  ports:
-    - "80:80"
-  restart: always
+    container_name: personal-portfolio
+    ports:
+      - "80:80"
+    restart: always
