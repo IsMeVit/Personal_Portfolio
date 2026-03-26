@@ -1,8 +1,9 @@
 version: '3.8'
 services:
   portfolio:
-  build: .
+    build:
+      context: .
   container_name: personal-portfolio
   ports:
     - "80:80"
-  restar: always
+  restart: always
